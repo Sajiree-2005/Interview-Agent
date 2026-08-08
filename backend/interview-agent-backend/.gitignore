@@ -2,7 +2,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.env .example
+.env
 .venv/
 venv/
 ENV/
