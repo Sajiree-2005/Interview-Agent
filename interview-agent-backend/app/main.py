@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
     # Load curriculum and build RAG index
     curriculum_service.load()
     retriever.build_index()
-    logger.info("startup_complete", rag_ready=True)
+    logger.info("startup_complete", rag_ready=retriever._initialized)
     yield
     logger.info("shutdown")
 

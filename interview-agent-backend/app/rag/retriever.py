@@ -1,9 +1,6 @@
-"""FAISS-based curriculum retriever."""
-import os
-import json
+"""Numpy-based curriculum retriever (FAISS-free for maximum compatibility)."""
 import numpy as np
-import faiss
-from typing import List, Dict, Any, Tuple, Optional
+from typing import List, Dict, Any, Optional
 from app.rag.embeddings import embedding_generator
 from app.services.curriculum_service import curriculum_service
 from app.core.config import get_settings
@@ -12,17 +9,23 @@ from app.core.logging import get_logger
 logger = get_logger(__name__)
 
 
+def _cosine_similarity(query: np.ndarray, embeddings: np.ndarray) -> np.ndarray:
+    """Compute cosine similarity between query and all embeddings."""
+    # Both are L2-normalized, so dot product = cosine similarity
+    return np.dot(embeddings, query)
+
+
 class CurriculumRetriever:
-    """Retrieves relevant curriculum days using dense vector search."""
+    """Retrieves relevant curriculum days using dense vector search (numpy-based)."""
 
     def __init__(self):
-        self._index: Optional[faiss.Index] = None
+        self._embeddings: Optional[np.ndarray] = None
         self._day_numbers: List[int] = []
         self._chunks: List[str] = []
         self._initialized = False
 
     def build_index(self) -> "CurriculumRetriever":
-        """Build FAISS index from curriculum data."""
+        """Build index from curriculum data."""
         if self._initialized:
             return self
 
@@ -40,18 +43,12 @@ class CurriculumRetriever:
             logger.warning("no_curriculum_texts_found")
             return self
 
-        embeddings = embedding_generator.encode(texts)
-        dim = embedding_generator.dimension
-
-        # Inner product index (cosine similarity since normalized)
-        self._index = faiss.IndexFlatIP(dim)
-        self._index.add(embeddings)
-
+        self._embeddings = embedding_generator.encode(texts)
         self._day_numbers = day_nums
         self._chunks = texts
         self._initialized = True
 
-        logger.info("faiss_index_built", days=len(day_nums), dimension=dim)
+        logger.info("retriever_index_built", days=len(day_nums), dim=self._embeddings.shape[1])
         return self
 
     def retrieve(self, query: str, top_k: Optional[int] = None) -> List[Dict[str, Any]]:
@@ -59,21 +56,20 @@ class CurriculumRetriever:
         if not self._initialized:
             self.build_index()
 
-        if self._index is None or self._index.ntotal == 0:
+        if self._embeddings is None or len(self._embeddings) == 0:
             return []
 
         settings = get_settings()
         k = top_k or settings.top_k_retrieval
 
         query_embedding = embedding_generator.encode_single(query)
-        query_embedding = np.expand_dims(query_embedding, axis=0)
 
-        distances, indices = self._index.search(query_embedding, k)
+        scores = _cosine_similarity(query_embedding, self._embeddings)
+        top_indices = np.argsort(scores)[::-1][:k]
 
         results = []
-        for score, idx in zip(distances[0], indices[0]):
-            if idx < 0 or idx >= len(self._day_numbers):
-                continue
+        for idx in top_indices:
+            idx = int(idx)
             day_num = self._day_numbers[idx]
             day = curriculum_service.get_day(day_num)
             if day:
@@ -81,7 +77,7 @@ class CurriculumRetriever:
                     "day": day_num,
                     "title": day.title,
                     "type": day.type,
-                    "score": float(score),
+                    "score": float(scores[idx]),
                     "text": self._chunks[idx][:500],
                 })
 

@@ -2,8 +2,7 @@
 import json
 from typing import Dict, Any, Optional
 from app.models.schemas import (
-    CandidateProfile, InterviewRequest, InterviewResponse, 
-    FeedbackData, QuestionRecord, AnswerRecord
+    CandidateProfile, InterviewRequest, InterviewResponse
 )
 from app.memory.interview_memory import memory_store, InterviewState, QuestionRecord, AnswerRecord
 from app.services.candidate_service import CandidateAnalyzer
