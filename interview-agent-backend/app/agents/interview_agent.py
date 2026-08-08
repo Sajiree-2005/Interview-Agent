@@ -1,6 +1,6 @@
 """Core interview agent orchestrating the entire interview flow."""
 import json
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from app.models.schemas import (
     CandidateProfile, InterviewRequest, InterviewResponse
 )
