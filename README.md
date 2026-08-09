@@ -2,8 +2,8 @@
 
 **Hackathon:** ABTalks Vibe Code Hackathon — Problem Statement 2: The Interview Agent  
 **Team:** InnoQueens  
-**Live Demo:** [https://interview-agent-epvq71sf2-sajirees-projects.vercel.app/](https://interview-agent-epvq71sf2-sajirees-projects.vercel.app/)  
-**Backend:** [https://interview-agent-yl3i.onrender.com](https://interview-agent-yl3i.onrender.com)  
+**Live Demo:** [Probe - Interview Agent](https://interview-agent-epvq71sf2-sajirees-projects.vercel.app/)  
+**Backend:** [https://interview-agent-yl3i.onrender.com](https://interview-agent-yl3i.onrender.com)
 
 ---
 
@@ -94,6 +94,7 @@ Technical interviews are often generic, repetitive, and fail to adapt to what a 
 ### Solution
 
 An **evidence-driven adaptive interview agent** that:
+
 - Builds an **Interview Blueprint** before asking a single question
 - Uses **Curriculum RAG** to ground every question in actual learning material
 - Maintains an **Evidence-Based Competency Model** with per-topic dimensions
@@ -122,17 +123,17 @@ Candidate Profile → Candidate Analyzer → Strategy Engine → Interview Bluep
 
 ### Core Features
 
-| Feature | Description |
-|---------|-------------|
-| Interview Strategy Engine | Generates per-candidate blueprints from learning history |
-| Curriculum RAG | Pre-computed TF-IDF embeddings with numpy cosine retrieval |
-| Adaptive Questioning | Difficulty and type adapt based on 6-dimension evaluation |
-| Competency Model | Per-topic scoring: conceptual, practical, reasoning, system design, communication, confidence |
-| Dynamic Difficulty | Foundational → Intermediate → Advanced → Expert |
-| Scenario Questioning | Prioritizes debugging, trade-off, and system-design questions |
-| Contradiction Detection | Semantic consistency checking across conversation |
-| Memory | Short-term conversation + structured competency memory |
-| Personalized Feedback | Final report with strengths, gaps, and 7-day learning path |
+| Feature                   | Description                                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------------------- |
+| Interview Strategy Engine | Generates per-candidate blueprints from learning history                                      |
+| Curriculum RAG            | Pre-computed TF-IDF embeddings with numpy cosine retrieval                                    |
+| Adaptive Questioning      | Difficulty and type adapt based on 6-dimension evaluation                                     |
+| Competency Model          | Per-topic scoring: conceptual, practical, reasoning, system design, communication, confidence |
+| Dynamic Difficulty        | Foundational → Intermediate → Advanced → Expert                                               |
+| Scenario Questioning      | Prioritizes debugging, trade-off, and system-design questions                                 |
+| Contradiction Detection   | Semantic consistency checking across conversation                                             |
+| Memory                    | Short-term conversation + structured competency memory                                        |
+| Personalized Feedback     | Final report with strengths, gaps, and 7-day learning path                                    |
 
 ### API Contract
 
@@ -141,14 +142,18 @@ POST /api/interview
 ```
 
 **Start Interview**
+
 ```json
 {
   "sessionId": "abc-123",
-  "candidate": { /* full candidate.json shape */ }
+  "candidate": {
+    /* full candidate.json shape */
+  }
 }
 ```
 
 **Continue Interview**
+
 ```json
 {
   "sessionId": "abc-123",
@@ -157,6 +162,7 @@ POST /api/interview
 ```
 
 **Response (in-progress)**
+
 ```json
 {
   "reply": "Next question text...",
@@ -165,6 +171,7 @@ POST /api/interview
 ```
 
 **Response (complete)**
+
 ```json
 {
   "reply": "Interview completed.",
@@ -174,8 +181,12 @@ POST /api/interview
     "strengths": [],
     "gaps": [],
     "next": [],
-    "fingerprint": { /* optional: competency scores */ },
-    "coverage": { /* optional: days/topics/types covered */ }
+    "fingerprint": {
+      /* optional: competency scores */
+    },
+    "coverage": {
+      /* optional: days/topics/types covered */
+    }
   }
 }
 ```
@@ -224,6 +235,7 @@ A console-style interview UI, deliberately not the generic "chat bubble on a pur
 ### Motion
 
 All animation is done with [Anime.js v4](https://animejs.com) — no other animation runtime:
+
 - A hand-built SVG **signal line** draws itself in and breathes gently; amplitude derived from the candidate's real completion percentage.
 - The **module rack** uses real `curriculum.json` module data, entrance-staggered via `onScroll`, sitting in real 3D space (`transform-style: preserve-3d`, `rotateX`).
 - The candidate profile panel **tilts in 3D** with the mouse (`TiltPanel.jsx`) using live `rotateX/rotateY` transforms.
@@ -263,35 +275,35 @@ npm run preview
 
 ### Backend (`backend/.env`)
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `OPENAI_API_KEY` | Yes | — | OpenAI or compatible API key |
-| `OPENAI_BASE_URL` | No | `https://api.openai.com/v1` | API base URL |
-| `OPENAI_MODEL` | No | `gpt-4o-mini` | Main model |
-| `EVAL_MODEL` | No | `gpt-4o-mini` | Evaluation model |
-| `APP_ENV` | No | `development` | production/development |
-| `LOG_LEVEL` | No | `INFO` | Logging level |
+| Variable          | Required | Default                     | Description                  |
+| ----------------- | -------- | --------------------------- | ---------------------------- |
+| `OPENAI_API_KEY`  | Yes      | —                           | OpenAI or compatible API key |
+| `OPENAI_BASE_URL` | No       | `https://api.openai.com/v1` | API base URL                 |
+| `OPENAI_MODEL`    | No       | `gpt-4o-mini`               | Main model                   |
+| `EVAL_MODEL`      | No       | `gpt-4o-mini`               | Evaluation model             |
+| `APP_ENV`         | No       | `development`               | production/development       |
+| `LOG_LEVEL`       | No       | `INFO`                      | Logging level                |
 
 ### Frontend (`frontend/.env`)
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `VITE_API_URL` | Yes | Backend URL (e.g. `https://interview-agent-yl3i.onrender.com`) |
+| Variable       | Required | Description                                                    |
+| -------------- | -------- | -------------------------------------------------------------- |
+| `VITE_API_URL` | Yes      | Backend URL (e.g. `https://interview-agent-yl3i.onrender.com`) |
 
 ---
 
 ## Design Decisions
 
-| Decision | Rationale |
-|----------|-----------|
-| **TF-IDF + numpy** instead of FAISS/torch | Render 512MB memory limit; Python 3.13 wheel gaps for `faiss-cpu` |
-| **Pre-computed embeddings** | Eliminates 400MB runtime model load; instant startup |
-| **In-memory sessions** | Sufficient for hackathon; Redis would be a production upgrade |
-| **OpenAI-compatible client** | Swappable to Groq, Azure, or any compatible provider via env vars |
-| **Single `POST /api/interview`** | Matches `technical-spec.md` exactly; state via `sessionId` |
-| **Oscilloscope UI** | Differentiator from generic AI chat UIs; grounded in product metaphor |
-| **Anime.js v4 only** | One animation runtime, no bloat; `prefers-reduced-motion` respected |
-| **Vite + React** | Fast dev server, optimized builds, straightforward deployment |
+| Decision                                  | Rationale                                                             |
+| ----------------------------------------- | --------------------------------------------------------------------- |
+| **TF-IDF + numpy** instead of FAISS/torch | Render 512MB memory limit; Python 3.13 wheel gaps for `faiss-cpu`     |
+| **Pre-computed embeddings**               | Eliminates 400MB runtime model load; instant startup                  |
+| **In-memory sessions**                    | Sufficient for hackathon; Redis would be a production upgrade         |
+| **OpenAI-compatible client**              | Swappable to Groq, Azure, or any compatible provider via env vars     |
+| **Single `POST /api/interview`**          | Matches `technical-spec.md` exactly; state via `sessionId`            |
+| **Oscilloscope UI**                       | Differentiator from generic AI chat UIs; grounded in product metaphor |
+| **Anime.js v4 only**                      | One animation runtime, no bloat; `prefers-reduced-motion` respected   |
+| **Vite + React**                          | Fast dev server, optimized builds, straightforward deployment         |
 
 ---
 
