@@ -158,7 +158,11 @@ Returns service status and RAG readiness.
 
 ```bash
 # Clone and enter directory
+<<<<<<< HEAD
+cd backend
+=======
 cd interview-agent-backend
+>>>>>>> 1cebba1fae7abec8708468eabe3b9e6ca8d5a5c5
 
 # Create virtual environment
 python -m venv .venv
