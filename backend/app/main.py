@@ -33,6 +33,26 @@ def create_app() -> FastAPI:
         version="1.0.0",
         lifespan=lifespan,
     )
+    
+    # CORS — MUST be added before routes
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=["*"],
+        max_age=600,
+    )
+    
+    # Routes
+    app.include_router(interview_router)
+    
+    @app.get("/health")
+    async def health():
+        return {"status": "ok", "rag_ready": retriever._initialized}
+    
+    return app
 
     # CORS
     app.add_middleware(
