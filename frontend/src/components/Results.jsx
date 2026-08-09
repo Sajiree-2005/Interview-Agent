@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { animate, stagger } from 'animejs'
 import SignalLine from './SignalLine.jsx'
+import ScoreCards from './ScoreCards.jsx'
+import ModuleStack from './ModuleStack.jsx'
 
 function Section({ title, items, accent, empty }) {
   if (!items || items.length === 0) {
@@ -40,6 +42,11 @@ export default function Results({ candidate, feedback, onRestart }) {
   }, [])
 
   const hasFeedback = Boolean(feedback)
+  // Spec guarantees summary/strengths/gaps/next. fingerprint/coverage are a
+  // richer optional extension this backend happens to return — render them
+  // when present, degrade gracefully when not.
+  const fingerprint = feedback?.fingerprint
+  const coverage = feedback?.coverage
 
   return (
     <div ref={rootRef} className="min-h-screen bg-ink-900 bg-grid text-paper">
@@ -76,6 +83,15 @@ export default function Results({ candidate, feedback, onRestart }) {
               <p className="mt-2 text-[15px] leading-relaxed text-paper">{feedback.summary}</p>
             </div>
 
+            {fingerprint && (
+              <div data-reveal className="mt-6">
+                <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.25em] text-haze">
+                  Competency fingerprint
+                </p>
+                <ScoreCards fingerprint={fingerprint} />
+              </div>
+            )}
+
             <div data-reveal className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
               <Section title="Strengths" items={feedback.strengths} accent="bg-teal" empty="No strengths recorded." />
               <Section title="Gaps" items={feedback.gaps} accent="bg-coral" empty="No gaps recorded." />
@@ -86,6 +102,33 @@ export default function Results({ candidate, feedback, onRestart }) {
                 empty="No recommendations recorded."
               />
             </div>
+
+            {coverage && (
+              <div data-reveal className="mt-8">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-haze">
+                    Coverage across the curriculum
+                  </p>
+                  <p className="font-mono text-[11px] text-haze">
+                    {coverage.questions_asked} questions · {coverage.days_covered?.length ?? 0} days
+                  </p>
+                </div>
+                <ModuleStack highlightDays={coverage.days_covered ?? []} accent="teal" />
+
+                {coverage.question_types && Object.keys(coverage.question_types).length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {Object.entries(coverage.question_types).map(([type, count]) => (
+                      <span
+                        key={type}
+                        className="rounded-full border border-line bg-ink-800/60 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-haze"
+                      >
+                        {type.replace(/_/g, ' ')} × {count}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
 

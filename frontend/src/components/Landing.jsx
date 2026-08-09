@@ -145,7 +145,7 @@ export default function Landing({ onBegin }) {
 
           <div className="mt-8">
             <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.25em] text-haze">31-day curriculum map</p>
-            <ModuleStack completedDays={progress.completedDays} />
+            <ModuleStack highlightDays={progress.completedDays} accent="amber" />
           </div>
 
           <button

@@ -71,7 +71,7 @@ class CompetencyDimension(BaseModel):
 class TopicCompetency(BaseModel):
     topic: str
     day: int
-    dimensions: CompetencyDimension = Field(default_factory=CompetencyDimension)
+    dimensions: CompetencyDimension
     evidence: List[str] = Field(default_factory=list)
     confidence_in_assessment: float = Field(0.5, ge=0.0, le=1.0)
 
