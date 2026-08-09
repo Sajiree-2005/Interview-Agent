@@ -3,7 +3,7 @@
 **Hackathon:** ABTalks Vibe Code Hackathon — Problem Statement 2: The Interview Agent  
 **Team:** InnoQueens  
 **Live Demo:** [Probe - Interview Agent](https://interview-agent-epvq71sf2-sajirees-projects.vercel.app/)  
-**Backend:** [https://interview-agent-yl3i.onrender.com](https://interview-agent-yl3i.onrender.com)
+**Backend:** [Probe - Interview Agent Backend](https://interview-agent-yl3i.onrender.com)
 
 ---
 
