@@ -119,7 +119,11 @@ Respond ONLY as valid JSON with this exact structure:
             return result
 
         except Exception as e:
-            logger.error("evaluation_failed", error=str(e))
+            err_str = str(e).lower()
+            if "429" in err_str or "quota" in err_str or "credit" in err_str or "insufficient" in err_str:
+                logger.error("openai_quota_exhausted", error=str(e))
+            else:
+                logger.error("evaluation_failed", error=str(e))
             return self._fallback_evaluation(answer)
 
     def _empty_evaluation(self) -> Dict[str, Any]:
@@ -146,13 +150,13 @@ Respond ONLY as valid JSON with this exact structure:
             "latency", "cost", "scalability", "security", "optimization",
             "vector", "embedding", "retrieval", "prompt", "agent", "rag"
         ])
-
+        
         base = 0.3 if length > 10 else 0.1
         base += 0.2 if has_technical else 0.0
         base += min(0.3, length / 100)
-
+        
         label = "acceptable" if base > 0.6 else ("partial" if base > 0.4 else "weak")
-
+        
         return {
             "correctness": round(base, 2),
             "conceptual_depth": round(base * 0.8, 2),
@@ -162,7 +166,7 @@ Respond ONLY as valid JSON with this exact structure:
             "communication_clarity": round(min(1.0, length / 50), 2),
             "overall_label": label,
             "what_was_right": ["Answer provided"],
-            "what_was_missed": ["Unable to fully evaluate due to service issue"],
+            "what_was_missed": ["LLM evaluation unavailable — heuristic scoring used"],
             "misconception": None,
             "probe_suggestion": "Can you elaborate on your reasoning?",
             "next_difficulty_recommendation": "same",

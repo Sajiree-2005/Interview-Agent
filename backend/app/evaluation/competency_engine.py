@@ -20,7 +20,11 @@ class CompetencyEngine:
 
         key = f"{day}:{topic}"
         if key not in competencies:
-            competencies[key] = TopicCompetency(topic=topic, day=day)
+            competencies[key] = TopicCompetency(
+                topic=topic,
+                day=day,
+                dimensions=CompetencyDimension(),
+            )
 
         comp = competencies[key]
 
