@@ -35,7 +35,8 @@ class CurriculumRetriever:
         days = curriculum_service.get_all_days()
         
         # Load pre-computed embeddings
-        data_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # retriever.py is at app/rag/retriever.py, data is at repo root
+        data_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         embeddings_path = os.path.join(data_dir, "data", "curriculum_embeddings.npy")
         day_map_path = os.path.join(data_dir, "data", "curriculum_day_map.json")
         
